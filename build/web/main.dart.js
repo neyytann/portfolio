@@ -79114,7 +79114,7 @@ A.j9.prototype={}
 A.lY.prototype={}
 A.jQ.prototype={}
 A.JS.prototype={
-L(a){return new A.xN(B.Lb,"Nathaniel Velasco \u2014 Backend Developer",A.pi(null,B.Bm,B.fm,A.aMr().$0().adQ(B.ee,B.cf),!0),!1,null)}}
+L(a){return new A.xN(B.Lb,"Nathaniel Velasco - Portfolio",A.pi(null,B.Bm,B.fm,A.aMr().$0().adQ(B.ee,B.cf),!0),!1,null)}}
 A.yu.prototype={
 ac(){var s=null,r=t.A
 return new A.CI(A.L1(),A.ak(["About",new A.br(s,r),"Skills",new A.br(s,r),"Projects",new A.br(s,r),"Experience",new A.br(s,r),"Contact",new A.br(s,r)],t.N,t.yi))}}
