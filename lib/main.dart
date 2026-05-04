@@ -12,7 +12,7 @@ class PortfolioApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: 'Nathaniel Velasco — Backend Developer',
+        title: 'Nathaniel Velasco - Portfolio',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.theme,
         home: const PortfolioHome(),
