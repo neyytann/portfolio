@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -25,8 +26,7 @@ class _HeroSectionState extends State<HeroSection>
       duration: const Duration(milliseconds: 1),
     )..forward();
 
-    // Card appears after hero text is done — deferred, not simultaneous
-      Future.delayed(const Duration(milliseconds: 2300), () {
+    Future.delayed(const Duration(milliseconds: 2300), () {
       if (mounted) setState(() => _showCard = true);
       Future.delayed(const Duration(milliseconds: 200), () {
         if (mounted) setState(() => _floatCard = true);
@@ -262,7 +262,7 @@ class _WordRevealState extends State<_WordReveal> with TickerProviderStateMixin 
   }
 }
 
-// ── Fade slide in block ───────────────────────────────────────────────────────
+// ── Fade slide in ─────────────────────────────────────────────────────────────
 
 class _FadeSlideIn extends StatefulWidget {
   final Widget child;
@@ -282,10 +282,7 @@ class _FadeSlideInState extends State<_FadeSlideIn>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
     _opacity = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
     _slide = Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero)
         .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
@@ -302,7 +299,7 @@ class _FadeSlideInState extends State<_FadeSlideIn>
   );
 }
 
-// ── Float card — only mounted after hero fades in ─────────────────────────────
+// ── Float card ────────────────────────────────────────────────────────────────
 
 class _FloatCard extends StatefulWidget {
   final bool animate;
@@ -312,7 +309,6 @@ class _FloatCard extends StatefulWidget {
   State<_FloatCard> createState() => _FloatCardState();
 }
 
-// Replace _FloatCardState with this:
 class _FloatCardState extends State<_FloatCard>
     with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
@@ -320,10 +316,7 @@ class _FloatCardState extends State<_FloatCard>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
+    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
     if (widget.animate) _ctrl.forward();
   }
 
@@ -334,24 +327,178 @@ class _FloatCardState extends State<_FloatCard>
   }
 
   @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
+  void dispose() { _ctrl.dispose(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+    opacity: _ctrl,
+    child: const _CodeCard(),
+  );
+}
+
+// ── Data models ───────────────────────────────────────────────────────────────
+
+class _S {
+  final String text;
+  final Color color;
+  const _S(this.text, this.color);
+}
+
+class _CodeLine {
+  final List<_S> spans;
+  _CodeLine(this.spans);
+  String get fullText => spans.map((s) => s.text).join();
+}
+
+class _TerminalEntry {
+  final String input;
+  final String output;
+  const _TerminalEntry({required this.input, required this.output});
+}
+
+// ── Code card ─────────────────────────────────────────────────────────────────
+
+class _CodeCard extends StatefulWidget {
+  const _CodeCard();
+  @override
+  State<_CodeCard> createState() => _CodeCardState();
+}
+
+class _CodeCardState extends State<_CodeCard> {
+  final List<_CodeLine> _lines = [
+    _CodeLine([_S('// about me', const Color(0xFF6A9955))]),
+    _CodeLine([]),
+    _CodeLine([_S('const ', const Color(0xFF569CD6)), _S('dev ', const Color(0xFFCCD6F6)), _S('= {', const Color(0xFF8892B0))]),
+    _CodeLine([_S('  name: ', const Color(0xFF9CDCFE)), _S("'Nathaniel Velasco'", const Color(0xFFCE9178)), _S(',', const Color(0xFF8892B0))]),
+    _CodeLine([_S('  role: ', const Color(0xFF9CDCFE)), _S("'Backend Dev'", const Color(0xFFCE9178)), _S(',', const Color(0xFF8892B0))]),
+    _CodeLine([_S('  location: ', const Color(0xFF9CDCFE)), _S("'Philippines'", const Color(0xFFCE9178)), _S(',', const Color(0xFF8892B0))]),
+    _CodeLine([_S('  stack: ', const Color(0xFF9CDCFE)), _S('[', const Color(0xFF8892B0))]),
+    _CodeLine([_S("    'Flutter'", const Color(0xFFCE9178)), _S(',', const Color(0xFF8892B0))]),
+    _CodeLine([_S("    'Go'", const Color(0xFFCE9178)), _S(',', const Color(0xFF8892B0))]),
+    _CodeLine([_S("    'Java'", const Color(0xFFCE9178)), _S(',', const Color(0xFF8892B0))]),
+    _CodeLine([_S("    'PostgreSQL'", const Color(0xFFCE9178)), _S(',', const Color(0xFF8892B0))]),
+    _CodeLine([_S('  ],', const Color(0xFF8892B0))]),
+    _CodeLine([_S('  available: ', const Color(0xFF9CDCFE)), _S('true', const Color(0xFF569CD6)), _S(',', const Color(0xFF8892B0))]),
+    _CodeLine([_S('};', const Color(0xFF8892B0))]),
+  ];
+
+  int _visibleLines = 0;
+  int _charCount = 0;
+  bool _doneTyping = false;
+  bool _showOutput = false;
+  bool _terminalActive = false;
+
+  final List<_TerminalEntry> _terminalHistory = [];
+  String _currentInput = '';
+  final FocusNode _focusNode = FocusNode();
+  final ScrollController _scrollCtrl = ScrollController();
+
+  static const _commands = {
+    'help': '  Available commands:\n  name       — who am I\n  role       — what I do\n  stack      — tech I use\n  location   — where I am\n  available  — hire me?\n  clear      — clear terminal\n  exit       — close terminal',
+    'name': '  Nathaniel Velasco',
+    'role': '  Backend Developer',
+    'stack': "  ['Flutter', 'Go', 'Java', 'PostgreSQL']",
+    'location': '  Philippines 🇵🇭',
+    'available': '  ✓ Open to new opportunities!',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _typeLines();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _ctrl,
-      child: const _CodeCard(),
-    );
+  void dispose() {
+    _focusNode.dispose();
+    _scrollCtrl.dispose();
+    super.dispose();
   }
-}
 
-// ── Code card — const, no state ───────────────────────────────────────────────
+  Future<void> _typeLines() async {
+    for (int i = 0; i < _lines.length; i++) {
+      if (!mounted) return;
+      setState(() { _visibleLines = i + 1; _charCount = 0; });
+      final fullLen = _lines[i].fullText.length;
+      if (fullLen == 0) {
+        await Future.delayed(const Duration(milliseconds: 80));
+        continue;
+      }
+      for (int c = 1; c <= fullLen; c++) {
+        await Future.delayed(const Duration(milliseconds: 28));
+        if (!mounted) return;
+        setState(() => _charCount = c);
+      }
+      await Future.delayed(const Duration(milliseconds: 60));
+    }
+    if (!mounted) return;
+    setState(() => _doneTyping = true);
+    await Future.delayed(const Duration(milliseconds: 400));
+    if (!mounted) return;
+    setState(() => _showOutput = true);
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (!mounted) return;
+    setState(() => _terminalActive = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _focusNode.requestFocus());
+  }
 
-class _CodeCard extends StatelessWidget {
-  const _CodeCard();
+  void _handleKey(KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return;
+    final key = event.logicalKey;
+    if (key == LogicalKeyboardKey.enter) {
+      _submitCommand();
+    } else if (key == LogicalKeyboardKey.backspace) {
+      if (_currentInput.isNotEmpty) {
+        setState(() => _currentInput = _currentInput.substring(0, _currentInput.length - 1));
+      }
+    } else {
+      final char = event.character;
+      if (char != null && char.isNotEmpty && !_isControlChar(char)) {
+        setState(() => _currentInput += char);
+      }
+    }
+    _scrollToBottom();
+  }
+
+  bool _isControlChar(String c) => c.codeUnitAt(0) < 32;
+
+  void _submitCommand() {
+    final cmd = _currentInput.trim().toLowerCase();
+    if (cmd.isEmpty) {
+      setState(() => _currentInput = '');
+      return;
+    }
+    if (cmd == 'clear') {
+      setState(() { _terminalHistory.clear(); _currentInput = ''; });
+      return;
+    }
+    if (cmd == 'exit') {
+      setState(() {
+        _terminalHistory.add(_TerminalEntry(input: cmd, output: '  Closing terminal...'));
+        _currentInput = '';
+        _terminalActive = false;
+      });
+      return;
+    }
+    final output = _commands[cmd] ?? '  Command not found: "$cmd". Type "help" for commands.';
+    setState(() {
+      _terminalHistory.add(_TerminalEntry(input: cmd, output: output));
+      _currentInput = '';
+    });
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollCtrl.hasClients) {
+        _scrollCtrl.animateTo(
+          _scrollCtrl.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -359,10 +506,12 @@ class _CodeCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.bgCard,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(
+          color: _terminalActive ? AppColors.accent.withOpacity(0.4) : AppColors.border,
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.accent.withOpacity(0.06),
+            color: AppColors.accent.withOpacity(_terminalActive ? 0.12 : 0.06),
             blurRadius: 40,
             spreadRadius: 4,
             offset: const Offset(0, 10),
@@ -372,6 +521,7 @@ class _CodeCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Title bar
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
@@ -387,42 +537,134 @@ class _CodeCard extends StatelessWidget {
               _dot(const Color(0xFF28C840)),
               const SizedBox(width: 16),
               Text('nathaniel.dart', style: AppTheme.mono(color: AppColors.textMuted, size: 11)),
+              const Spacer(),
+              if (_terminalActive)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(3),
+                    border: Border.all(color: AppColors.accent.withOpacity(0.3)),
+                  ),
+                  child: Text('INTERACTIVE', style: AppTheme.mono(color: AppColors.accent, size: 9)),
+                ),
             ]),
           ),
+
+          // Code + terminal body
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _line([_s('// about me', AppColors.textMuted.withOpacity(0.5))]),
-                const SizedBox(height: 8),
-                _line([_s('const ', const Color(0xFF569CD6)), _s('dev ', AppColors.text), _s('= {', AppColors.textMuted)]),
-                const SizedBox(height: 5),
-                _line([_s('  name: ', const Color(0xFF9CDCFE)), _s("'Nathaniel Velasco'", const Color(0xFFCE9178)), _s(',', AppColors.textMuted)]),
-                const SizedBox(height: 4),
-                _line([_s('  role: ', const Color(0xFF9CDCFE)), _s("'Backend Dev'", const Color(0xFFCE9178)), _s(',', AppColors.textMuted)]),
-                const SizedBox(height: 4),
-                _line([_s('  location: ', const Color(0xFF9CDCFE)), _s("'Philippines'", const Color(0xFFCE9178)), _s(',', AppColors.textMuted)]),
-                const SizedBox(height: 5),
-                _line([_s('  stack: ', const Color(0xFF9CDCFE)), _s('[', AppColors.textMuted)]),
-                ...['Flutter', 'Go', 'Java', 'PostgreSQL'].map((s) =>
-                  Padding(
+                // Code lines
+                ...List.generate(_visibleLines, (i) {
+                  final isLast = i == _visibleLines - 1;
+                  final line = _lines[i];
+
+                  return Padding(
                     padding: const EdgeInsets.only(bottom: 3),
-                    child: _line([_s('    ', AppColors.text), _s("'$s'", const Color(0xFFCE9178)), _s(',', AppColors.textMuted)]),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 24,
+                          child: Text('${i + 1}',
+                              style: AppTheme.mono(
+                                  color: AppColors.textMuted.withOpacity(0.35), size: 11)),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: isLast && !_doneTyping
+                              ? _buildPartialLine(line, _charCount)
+                              : RichText(
+                                  text: TextSpan(
+                                    children: line.spans.map((s) => TextSpan(
+                                      text: s.text,
+                                      style: AppTheme.mono(color: s.color, size: 12),
+                                    )).toList(),
+                                  ),
+                                ),
+                        ),
+                        if (isLast && !_doneTyping) const _BlinkingCursor(),
+                      ],
+                    ),
+                  );
+                }),
+
+                // Run line
+                if (_doneTyping) ...[
+                  const SizedBox(height: 14),
+                  Row(children: [
+                    Text('▶ ', style: AppTheme.mono(color: AppColors.accent, size: 12)),
+                    Text('node nathaniel.dart',
+                        style: AppTheme.mono(color: AppColors.textMuted, size: 11)),
+                    const SizedBox(width: 4),
+                    if (!_showOutput) const _BlinkingCursor(),
+                  ]),
+                ],
+
+                // Output
+                if (_showOutput) ...[
+                  const SizedBox(height: 6),
+                  _OutputLine(),
+                ],
+
+                // Terminal
+                if (_terminalActive) ...[
+                  const SizedBox(height: 12),
+                  Container(height: 1, color: AppColors.border.withOpacity(0.5)),
+                  const SizedBox(height: 10),
+                  Text('  Type "help" for commands',
+                      style: AppTheme.mono(
+                          color: AppColors.textMuted.withOpacity(0.5), size: 10)),
+                  const SizedBox(height: 8),
+
+                  // History
+                  if (_terminalHistory.isNotEmpty)
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 120),
+                      child: SingleChildScrollView(
+                        controller: _scrollCtrl,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: _terminalHistory.map((entry) => Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(children: [
+                                  Text('❯ ',
+                                      style: AppTheme.mono(color: AppColors.accent, size: 11)),
+                                  Text(entry.input,
+                                      style: AppTheme.mono(color: AppColors.textLight, size: 11)),
+                                ]),
+                                const SizedBox(height: 2),
+                                Text(entry.output,
+                                    style: AppTheme.mono(color: AppColors.textMuted, size: 11)),
+                              ],
+                            ),
+                          )).toList(),
+                        ),
+                      ),
+                    ),
+
+                  // Input
+                  KeyboardListener(
+                    focusNode: _focusNode,
+                    onKeyEvent: _handleKey,
+                    child: GestureDetector(
+                      onTap: () => _focusNode.requestFocus(),
+                      child: Row(children: [
+                        Text('❯ ',
+                            style: AppTheme.mono(color: AppColors.accent, size: 11)),
+                        Text(_currentInput,
+                            style: AppTheme.mono(color: AppColors.textLight, size: 11)),
+                        const _BlinkingCursor(),
+                      ]),
+                    ),
                   ),
-                ),
-                _line([_s('  ],', AppColors.textMuted)]),
-                const SizedBox(height: 5),
-                _line([_s('  available: ', const Color(0xFF9CDCFE)), _s('true', const Color(0xFF569CD6)), _s(',', AppColors.textMuted)]),
-                const SizedBox(height: 5),
-                _line([_s('};', AppColors.textMuted)]),
-                const SizedBox(height: 14),
-                Row(children: [
-                  Text('▶ ', style: AppTheme.mono(color: AppColors.accent, size: 12)),
-                  Text('node nathaniel.dart', style: AppTheme.mono(color: AppColors.textMuted, size: 11)),
-                  const SizedBox(width: 4),
-                  const _BlinkingCursor(),
-                ]),
+                ],
               ],
             ),
           ),
@@ -431,16 +673,63 @@ class _CodeCard extends StatelessWidget {
     );
   }
 
+  Widget _buildPartialLine(_CodeLine line, int charCount) {
+    int remaining = charCount;
+    final spans = <TextSpan>[];
+    for (final s in line.spans) {
+      if (remaining <= 0) break;
+      final take = remaining >= s.text.length
+          ? s.text
+          : s.text.substring(0, remaining);
+      spans.add(TextSpan(text: take, style: AppTheme.mono(color: s.color, size: 12)));
+      remaining -= s.text.length;
+    }
+    return RichText(text: TextSpan(children: spans));
+  }
+
   Widget _dot(Color color) => Container(
-    width: 12, height: 12,
+    width: 12,
+    height: 12,
     decoration: BoxDecoration(color: color, shape: BoxShape.circle),
   );
-
-  Widget _line(List<TextSpan> spans) => RichText(text: TextSpan(children: spans));
-
-  TextSpan _s(String text, Color color) =>
-      TextSpan(text: text, style: AppTheme.mono(color: color, size: 12));
 }
+
+// ── Output line ───────────────────────────────────────────────────────────────
+
+class _OutputLine extends StatefulWidget {
+  @override
+  State<_OutputLine> createState() => _OutputLineState();
+}
+
+class _OutputLineState extends State<_OutputLine> {
+  final String _text = '✓ Available for new opportunities';
+  int _count = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _type();
+  }
+
+  Future<void> _type() async {
+    for (int i = 1; i <= _text.length; i++) {
+      await Future.delayed(const Duration(milliseconds: 35));
+      if (!mounted) return;
+      setState(() => _count = i);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Text(_text.substring(0, _count),
+          style: AppTheme.mono(color: AppColors.accent, size: 11)),
+      if (_count < _text.length) const _BlinkingCursor(),
+    ],
+  );
+}
+
+// ── Blinking cursor ───────────────────────────────────────────────────────────
 
 class _BlinkingCursor extends StatefulWidget {
   const _BlinkingCursor();
@@ -455,7 +744,8 @@ class _BlinkingCursorState extends State<_BlinkingCursor>
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 530))
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 530))
       ..repeat(reverse: true);
   }
 
@@ -510,7 +800,8 @@ class _SocialLinkState extends State<_SocialLink> {
         duration: const Duration(milliseconds: 150),
         transform: Matrix4.translationValues(0, _hover ? -3 : 0, 0),
         child: Text(widget.label,
-            style: AppTheme.mono(color: _hover ? AppColors.accent : AppColors.textMuted, size: 12)),
+            style: AppTheme.mono(
+                color: _hover ? AppColors.accent : AppColors.textMuted, size: 12)),
       ),
     ),
   );
