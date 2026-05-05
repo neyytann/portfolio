@@ -11,7 +11,7 @@ class Project {
   final List<String> stack;
   final String github;
   final String live;
-  final String image;
+  final List<String> images;
   const Project({
     required this.number,
     required this.name,
@@ -19,7 +19,7 @@ class Project {
     required this.stack,
     required this.github,
     this.live = '',
-    this.image = '',
+    this.images = const [],
   });
 }
 
@@ -38,8 +38,6 @@ class Experience {
   });
 }
 
-// ── Data ──────────────────────────────────────────────────────────────────────
-
 const skillGroups = [
   SkillGroup(category: 'Mobile',  skills: ['Flutter']),
   SkillGroup(category: 'Backend', skills: ['Python', 'Go', 'Java', 'REST API']),
@@ -50,20 +48,32 @@ const skillGroups = [
 const projects = [
   Project(
     number: '01',
-    name: 'Internship Management System',
+    name: 'Orbis - Internship Management System',
     description: 'A centralized platform designed to streamline and automate the administration of internship programs. It enables organizations to efficiently manage intern records, monitor attendance, and track overall performance within a single system. By digitizing routine processes, it reduces manual workload and improves accuracy in handling intern-related data.',
     stack: ['Flutter', 'Go', 'REST API', 'PostgreSQL'],
-    github: 'https://github.com/yourusername/project-one',
-    live: '',
-    image: 'lib/assets/images/project1.png',
+    github: 'https://github.com/neyytann/orbis',
+    images: [
+      'assets/images/intern.png',
+      'assets/images/intern2.png',
+      'assets/images/intern3.png',
+      'assets/images/intern4.png',
+      'assets/images/intern5.png',
+    ],
   ),
   Project(
     number: '02',
-    name: 'Project Name',
-    description: 'A short description of what this project does and the problem it solves. Replace this with your own project details.',
-    stack: ['Flutter', 'Go', 'REST API'],
-    github: '',
-    image: 'lib/assets/images/project2.png',
+    name: 'Portfolio Website',
+    description: 'A portfolio website presenting my work as a software developer, highlighting projects, technical skills, and experience in building functional and efficient applications.',
+    stack: ['Flutter'],
+    github: 'https://github.com/neyytann/portfolio',
+    images: [
+      'assets/images/portfolio.png',
+      'assets/images/portfolio2.png',
+      'assets/images/portfolio3.png',
+      'assets/images/portfolio4.png',
+      'assets/images/portfolio5.png',
+      'assets/images/portfolio6.png',
+    ],
   ),
 ];
 

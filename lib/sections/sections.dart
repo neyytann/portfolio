@@ -4,6 +4,7 @@ import '../data.dart';
 import '../widgets/shared.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 class RevealNotifier extends ChangeNotifier {
   static final instance = RevealNotifier();
@@ -21,7 +22,8 @@ EdgeInsets _pad(BuildContext ctx) {
 }
 
 Widget _constrained(Widget child) => Center(
-      child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: _maxW), child: child),
+      child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _maxW), child: child),
     );
 
 // ── Scroll reveal ─────────────────────────────────────────────────────────────
@@ -65,8 +67,12 @@ class _ScrollRevealState extends State<_ScrollReveal>
     final vh = MediaQuery.of(context).size.height;
     final inView = pos.dy < vh * 0.93 && pos.dy > -box.size.height;
 
-    if (inView && !_ctrl.isAnimating && _ctrl.status != AnimationStatus.completed) {
-      Future.delayed(widget.delay, () { if (mounted) _ctrl.forward(); });
+    if (inView &&
+        !_ctrl.isAnimating &&
+        _ctrl.status != AnimationStatus.completed) {
+      Future.delayed(widget.delay, () {
+        if (mounted) _ctrl.forward();
+      });
     } else if (pos.dy >= vh * 0.93) {
       _ctrl.reset();
     }
@@ -81,14 +87,14 @@ class _ScrollRevealState extends State<_ScrollReveal>
 
   @override
   Widget build(BuildContext context) => RepaintBoundary(
-    child: FadeTransition(
-      opacity: _opacity,
-      child: SlideTransition(
-        position: _slide,
-        child: KeyedSubtree(key: _key, child: widget.child),
-      ),
-    ),
-  );
+        child: FadeTransition(
+          opacity: _opacity,
+          child: SlideTransition(
+            position: _slide,
+            child: KeyedSubtree(key: _key, child: widget.child),
+          ),
+        ),
+      );
 }
 
 // ── About ─────────────────────────────────────────────────────────────────────
@@ -116,82 +122,90 @@ class AboutSection extends StatelessWidget {
   }
 
   Widget _bio() => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      ...[
-        "Hello! I'm Nathaniel, a software developer based in the Philippines who enjoys building things that live on the internet.",
-        "I work on a wide range of projects — from mobile apps to backend APIs — with a focus on writing clean, scalable code that solves real problems.",
-        "When I'm not coding, I'm usually exploring new technologies, contributing to open source, or leveling up my system design skills.",
-      ].asMap().entries.map((e) => Padding(
-        padding: const EdgeInsets.only(bottom: 16),
-        child: Text(
-          e.value,
-          style: AppTheme.sans(color: AppColors.textMuted, size: 15, height: 1.75),
-        ),
-      )),
-      const SizedBox(height: 16),
-      Text("Technologies I've been working with recently:",
-          style: AppTheme.sans(color: AppColors.text, size: 14, height: 1.6)),
-      const SizedBox(height: 16),
-      Wrap(
-        spacing: 0,
-        runSpacing: 0,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          'Flutter', 'Dart', 'Go', 'C++', 'Java', 'PostgreSQL'
-        ].map((t) => SizedBox(
-          width: 180,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Row(children: [
-              Text('▹ ', style: AppTheme.mono(color: AppColors.accent, size: 13)),
-              Text(t, style: AppTheme.mono(color: AppColors.textMuted, size: 12)),
-            ]),
+          ...[
+            "Hello! I'm Nathaniel, a software developer based in the Philippines who enjoys building things that live on the internet.",
+            "I work on a wide range of projects — from mobile apps to backend APIs — with a focus on writing clean, scalable code that solves real problems.",
+            "When I'm not coding, I'm usually exploring new technologies, contributing to open source, or leveling up my system design skills.",
+          ].asMap().entries.map((e) => Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Text(
+                  e.value,
+                  style: AppTheme.sans(
+                      color: AppColors.textMuted, size: 15, height: 1.75),
+                ),
+              )),
+          const SizedBox(height: 16),
+          Text("Technologies I've been working with recently:",
+              style: AppTheme.sans(
+                  color: AppColors.text, size: 14, height: 1.6)),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 0,
+            runSpacing: 0,
+            children: ['Flutter', 'Dart', 'Go', 'C++', 'Java', 'PostgreSQL']
+                .map((t) => SizedBox(
+                      width: 180,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Row(children: [
+                          Text('▹ ',
+                              style: AppTheme.mono(
+                                  color: AppColors.accent, size: 13)),
+                          Text(t,
+                              style: AppTheme.mono(
+                                  color: AppColors.textMuted, size: 12)),
+                        ]),
+                      ),
+                    ))
+                .toList(),
           ),
-        )).toList(),
-      ),
-    ],
-  );
+        ],
+      );
 
   Widget _avatar() => Container(
-    width: 260,
-    height: 260,
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(6),
-      border: Border.all(color: AppColors.accent.withOpacity(0.4), width: 2),
-      boxShadow: [
-        BoxShadow(
-          color: AppColors.accent.withOpacity(0.15),
-          blurRadius: 32,
-          spreadRadius: 2,
+        width: 260,
+        height: 260,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          border:
+              Border.all(color: AppColors.accent.withOpacity(0.4), width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accent.withOpacity(0.15),
+              blurRadius: 32,
+              spreadRadius: 2,
+            ),
+          ],
         ),
-      ],
-    ),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(6),
-      child: Image.asset(
-        'lib/assets/images/nathan.jpg',
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(color: AppColors.bgCard),
-      ),
-    ),
-  );
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Image.asset(
+            'assets/images/nathan.jpg',
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) =>
+                Container(color: AppColors.bgCard),
+          ),
+        ),
+      );
 
   Widget _desktopLayout() => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Expanded(flex: 3, child: _bio()),
-      const SizedBox(width: 60),
-      _avatar(),
-    ],
-  );
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(flex: 3, child: _bio()),
+          const SizedBox(width: 60),
+          _avatar(),
+        ],
+      );
 
   Widget _mobileLayout() => Column(
-    children: [
-      _bio(),
-      const SizedBox(height: 40),
-      _avatar(),
-    ],
-  );
+        children: [
+          _bio(),
+          const SizedBox(height: 40),
+          _avatar(),
+        ],
+      );
 }
 
 // ── Skills ────────────────────────────────────────────────────────────────────
@@ -213,19 +227,22 @@ class SkillsSection extends StatelessWidget {
             delay: const Duration(milliseconds: 60),
             child: Text(
               'Technologies & Tools',
-              style: AppTheme.sans(color: AppColors.textMuted, size: 14, height: 1.6),
+              style: AppTheme.sans(
+                  color: AppColors.textMuted, size: 14, height: 1.6),
             ),
           ),
           const SizedBox(height: 48),
           Wrap(
             spacing: isMobile ? 12 : 20,
             runSpacing: isMobile ? 12 : 20,
-            children: skillGroups.asMap().entries.map((e) =>
-              _ScrollReveal(
-                delay: Duration(milliseconds: 80 + e.key * 70),
-                child: _SkillCard(group: e.value),
-              ),
-            ).toList(),
+            children: skillGroups
+                .asMap()
+                .entries
+                .map((e) => _ScrollReveal(
+                      delay: Duration(milliseconds: 80 + e.key * 70),
+                      child: _SkillCard(group: e.value),
+                    ))
+                .toList(),
           ),
         ],
       )),
@@ -248,20 +265,31 @@ class _SkillCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(children: [
-              Text('▹ ', style: AppTheme.mono(color: AppColors.accent, size: 14)),
+              Text('▹ ',
+                  style:
+                      AppTheme.mono(color: AppColors.accent, size: 14)),
               Text(group.category,
-                  style: AppTheme.mono(color: AppColors.accent, size: 12, weight: FontWeight.w600)),
+                  style: AppTheme.mono(
+                      color: AppColors.accent,
+                      size: 12,
+                      weight: FontWeight.w600)),
             ]),
             const SizedBox(height: 16),
             ...group.skills.map((s) => Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Row(children: [
-                Container(width: 4, height: 4,
-                    decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle)),
-                const SizedBox(width: 12),
-                Text(s, style: AppTheme.sans(size: 13, color: AppColors.textMuted)),
-              ]),
-            )),
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(children: [
+                    Container(
+                        width: 4,
+                        height: 4,
+                        decoration: const BoxDecoration(
+                            color: AppColors.accent,
+                            shape: BoxShape.circle)),
+                    const SizedBox(width: 12),
+                    Text(s,
+                        style: AppTheme.sans(
+                            size: 13, color: AppColors.textMuted)),
+                  ]),
+                )),
           ],
         ),
       ),
@@ -287,24 +315,27 @@ class ProjectsSection extends StatelessWidget {
             delay: const Duration(milliseconds: 60),
             child: Text(
               "Some Things I've Built",
-              style: AppTheme.display(size: 28, color: AppColors.textMuted, weight: FontWeight.w600),
+              style: AppTheme.display(
+                  size: 28,
+                  color: AppColors.textMuted,
+                  weight: FontWeight.w600),
             ),
           ),
           const SizedBox(height: 48),
-          ...projects.asMap().entries.map((e) =>
-            _ScrollReveal(
-              delay: Duration(milliseconds: 100 + e.key * 100),
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: _ProjectCard(project: e.value, index: e.key),
-              ),
-            ),
-          ),
+          ...projects.asMap().entries.map((e) => _ScrollReveal(
+                delay: Duration(milliseconds: 100 + e.key * 100),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: _ProjectCard(project: e.value, index: e.key),
+                ),
+              )),
         ],
       )),
     );
   }
 }
+
+// ── Project card ──────────────────────────────────────────────────────────────
 
 class _ProjectCard extends StatefulWidget {
   final Project project;
@@ -315,157 +346,396 @@ class _ProjectCard extends StatefulWidget {
 }
 
 class _ProjectCardState extends State<_ProjectCard> {
-  bool _showImage = false;
+  void _openLightbox(BuildContext context, int startIndex) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.85),
+      builder: (_) => _Lightbox(
+        images: widget.project.images,
+        initialIndex: startIndex,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 768;
 
     return CardBox(
-      padding: const EdgeInsets.all(0),
+      padding: const EdgeInsets.all(28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image preview — show/hide toggle
-          if (widget.project.image.isNotEmpty)
-            GestureDetector(
-              onTap: () => setState(() => _showImage = !_showImage),
-              child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  height: _showImage ? (isMobile ? 180.0 : 240.0) : 0,
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-                    child: _showImage
-                        ? Image.asset(
-                            widget.project.image,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              color: AppColors.bgCard,
-                              child: Center(
-                                child: Text('No preview available',
-                                    style: AppTheme.mono(
-                                        color: AppColors.textMuted, size: 12)),
+          const Icon(Icons.folder_outlined, color: AppColors.accent, size: 36),
+          const SizedBox(height: 20),
+          Text(
+            widget.project.name,
+            style: AppTheme.display(
+                size: 18,
+                color: AppColors.textLight,
+                weight: FontWeight.w600),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            widget.project.description,
+            style: AppTheme.sans(size: 14, color: AppColors.textMuted, height: 1.7),
+          ),
+          const SizedBox(height: 20),
+          Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: widget.project.stack.map((t) => TagChip(t)).toList(),
+          ),
+
+          // Thumbnail strip
+          if (widget.project.images.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            Container(height: 1, color: AppColors.border.withOpacity(0.5)),
+            const SizedBox(height: 16),
+            Row(children: [
+              Text('▹ ',
+                  style: AppTheme.mono(color: AppColors.accent, size: 11)),
+              Text('Preview',
+                  style: AppTheme.mono(
+                      color: AppColors.textMuted,
+                      size: 11,
+                      weight: FontWeight.w600)),
+              const SizedBox(width: 8),
+              Text('(${widget.project.images.length} screenshot${widget.project.images.length > 1 ? 's' : ''})',
+                  style: AppTheme.mono(
+                      color: AppColors.textMuted.withOpacity(0.5), size: 10)),
+            ]),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: widget.project.images.asMap().entries.map((e) {
+                return GestureDetector(
+                  onTap: () => _openLightbox(context, e.key),
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Container(
+                      width: isMobile ? 70 : 80,
+                      height: isMobile ? 52 : 60,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.asset(
+                              e.value,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                color: AppColors.bgCard,
+                                child: const Icon(
+                                    Icons.image_not_supported,
+                                    color: AppColors.textMuted,
+                                    size: 18),
                               ),
                             ),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-                ),
-              ),
-            ),
-
-          // Card content
-          Padding(
-            padding: const EdgeInsets.all(28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Icon(Icons.folder_outlined, color: AppColors.accent, size: 36),
-                    Row(children: [
-                      // Preview toggle button
-                      if (widget.project.image.isNotEmpty)
-                        _ActionButton(
-                          icon: _showImage ? Icons.visibility_off : Icons.visibility,
-                          tooltip: _showImage ? 'Hide preview' : 'Show preview',
-                          onTap: () => setState(() => _showImage = !_showImage),
+                            _ThumbnailOverlay(),
+                          ],
                         ),
-                    ]),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  widget.project.name,
-                  style: AppTheme.display(
-                      size: 18, color: AppColors.textLight, weight: FontWeight.w600),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  widget.project.description,
-                  style: AppTheme.sans(size: 14, color: AppColors.textMuted, height: 1.7),
-                ),
-                const SizedBox(height: 20),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 8,
-                  children: widget.project.stack.map((t) => TagChip(t)).toList(),
-                ),
-              ],
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
-          ),
+          ],
+
+          // GitHub button
+          if (widget.project.github.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            Container(height: 1, color: AppColors.border.withOpacity(0.5)),
+            const SizedBox(height: 16),
+            _GitHubButton(url: widget.project.github),
+          ],
         ],
       ),
     );
   }
 }
 
-class _ActionButton extends StatefulWidget {
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
-  const _ActionButton({required this.icon, required this.tooltip, required this.onTap});
+// ── GitHub button ─────────────────────────────────────────────────────────────
+
+class _GitHubButton extends StatefulWidget {
+  final String url;
+  const _GitHubButton({required this.url});
   @override
-  State<_ActionButton> createState() => _ActionButtonState();
+  State<_GitHubButton> createState() => _GitHubButtonState();
 }
 
-class _ActionButtonState extends State<_ActionButton> {
+class _GitHubButtonState extends State<_GitHubButton> {
   bool _hover = false;
   @override
   Widget build(BuildContext context) => MouseRegion(
-    cursor: SystemMouseCursors.click,
-    onEnter: (_) => setState(() => _hover = true),
-    onExit: (_) => setState(() => _hover = false),
-    child: Tooltip(
-      message: widget.tooltip,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          transform: Matrix4.translationValues(0, _hover ? -3 : 0, 0),
-          child: Icon(
-            widget.icon,
-            color: _hover ? AppColors.accent : AppColors.textMuted,
-            size: 20,
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          onTap: () async {
+            final uri = Uri.parse(widget.url);
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            decoration: BoxDecoration(
+              color: _hover ? AppColors.accentLight : Colors.transparent,
+              border: Border.all(color: AppColors.accent),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.code, color: AppColors.accent, size: 14),
+                const SizedBox(width: 8),
+                Text(
+                  'View on GitHub',
+                  style: AppTheme.mono(
+                      color: AppColors.accent,
+                      size: 12,
+                      weight: FontWeight.w500),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    ),
-  );
+      );
 }
 
-class _IconLink extends StatefulWidget {
-  final IconData icon;
-  final String url;
-  const _IconLink({required this.icon, required this.url});
+// ── Thumbnail hover overlay ───────────────────────────────────────────────────
+
+class _ThumbnailOverlay extends StatefulWidget {
   @override
-  State<_IconLink> createState() => _IconLinkState();
+  State<_ThumbnailOverlay> createState() => _ThumbnailOverlayState();
 }
 
-class _IconLinkState extends State<_IconLink> {
+class _ThumbnailOverlayState extends State<_ThumbnailOverlay> {
   bool _hover = false;
   @override
   Widget build(BuildContext context) => MouseRegion(
-    cursor: SystemMouseCursors.click,
-    onEnter: (_) => setState(() => _hover = true),
-    onExit: (_) => setState(() => _hover = false),
-    child: GestureDetector(
-      onTap: () {},
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        transform: Matrix4.translationValues(0, _hover ? -3 : 0, 0),
-        child: Icon(widget.icon,
-          color: _hover ? AppColors.accent : AppColors.textMuted,
-          size: 20,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          color: _hover ? Colors.black.withOpacity(0.35) : Colors.transparent,
+          child: _hover
+              ? const Center(
+                  child: Icon(Icons.zoom_in, color: Colors.white, size: 18))
+              : null,
         ),
+      );
+}
+
+// ── Lightbox ──────────────────────────────────────────────────────────────────
+
+class _Lightbox extends StatefulWidget {
+  final List<String> images;
+  final int initialIndex;
+  const _Lightbox({required this.images, required this.initialIndex});
+  @override
+  State<_Lightbox> createState() => _LightboxState();
+}
+
+class _LightboxState extends State<_Lightbox> {
+  late int _current;
+  late PageController _pageCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _current = widget.initialIndex;
+    _pageCtrl = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageCtrl.dispose();
+    super.dispose();
+  }
+
+  void _go(int index) {
+    if (index < 0 || index >= widget.images.length) return;
+    setState(() => _current = index);
+    _pageCtrl.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final w = MediaQuery.of(context).size.width;
+    final h = MediaQuery.of(context).size.height;
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: w < 600 ? 16 : 40,
+        vertical: 40,
       ),
-    ),
-  );
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: w < 600 ? w - 32 : 860,
+            height: h * 0.75,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0A0E1A),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.bgNav,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                    border: Border(bottom: BorderSide(color: AppColors.border)),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        '${_current + 1} / ${widget.images.length}',
+                        style: AppTheme.mono(color: AppColors.textMuted, size: 12),
+                      ),
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: Icon(Icons.close, color: AppColors.textMuted, size: 18),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageCtrl,
+                    onPageChanged: (i) => setState(() => _current = i),
+                    itemCount: widget.images.length,
+                    itemBuilder: (_, i) => Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Image.asset(
+                        widget.images[i],
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => Center(
+                          child: Text('Image not found',
+                              style: AppTheme.mono(color: AppColors.textMuted, size: 13)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      widget.images.length,
+                      (i) => GestureDetector(
+                        onTap: () => _go(i),
+                        child: MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: i == _current ? 20 : 7,
+                            height: 7,
+                            margin: const EdgeInsets.symmetric(horizontal: 3),
+                            decoration: BoxDecoration(
+                              color: i == _current ? AppColors.accent : AppColors.border,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (widget.images.length > 1)
+            Positioned(
+              left: 0,
+              child: _NavArrow(
+                icon: Icons.chevron_left,
+                onTap: _current > 0 ? () => _go(_current - 1) : null,
+              ),
+            ),
+          if (widget.images.length > 1)
+            Positioned(
+              right: 0,
+              child: _NavArrow(
+                icon: Icons.chevron_right,
+                onTap: _current < widget.images.length - 1
+                    ? () => _go(_current + 1)
+                    : null,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Nav arrow ─────────────────────────────────────────────────────────────────
+
+class _NavArrow extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback? onTap;
+  const _NavArrow({required this.icon, required this.onTap});
+  @override
+  State<_NavArrow> createState() => _NavArrowState();
+}
+
+class _NavArrowState extends State<_NavArrow> {
+  bool _hover = false;
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+        cursor: widget.onTap != null
+            ? SystemMouseCursors.click
+            : SystemMouseCursors.basic,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: _hover && widget.onTap != null
+                  ? AppColors.accent.withOpacity(0.15)
+                  : Colors.black.withOpacity(0.4),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: _hover && widget.onTap != null
+                    ? AppColors.accent.withOpacity(0.5)
+                    : AppColors.border,
+              ),
+            ),
+            child: Icon(
+              widget.icon,
+              color: widget.onTap != null
+                  ? (_hover ? AppColors.accent : AppColors.textMuted)
+                  : AppColors.border,
+              size: 20,
+            ),
+          ),
+        ),
+      );
 }
 
 // ── Experience ────────────────────────────────────────────────────────────────
@@ -509,15 +779,20 @@ class _DesktopExperienceState extends State<_DesktopExperience> {
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: experiences.asMap().entries.map((e) =>
-            _Tab(
-              label: e.value.company,
-              selected: e.key == _selected,
-              onTap: () => setState(() => _selected = e.key),
-            ),
-          ).toList(),
+          children: experiences
+              .asMap()
+              .entries
+              .map((e) => _Tab(
+                    label: e.value.company,
+                    selected: e.key == _selected,
+                    onTap: () => setState(() => _selected = e.key),
+                  ))
+              .toList(),
         ),
-        Container(width: 2, color: AppColors.border, margin: const EdgeInsets.only(left: 0, right: 32)),
+        Container(
+            width: 2,
+            color: AppColors.border,
+            margin: const EdgeInsets.only(left: 0, right: 32)),
         Expanded(child: _ExpContent(exp: exp)),
       ],
     );
@@ -540,13 +815,15 @@ class _MobileExperienceState extends State<_MobileExperience> {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
-            children: experiences.asMap().entries.map((e) =>
-              _TabH(
-                label: e.value.company,
-                selected: e.key == _selected,
-                onTap: () => setState(() => _selected = e.key),
-              ),
-            ).toList(),
+            children: experiences
+                .asMap()
+                .entries
+                .map((e) => _TabH(
+                      label: e.value.company,
+                      selected: e.key == _selected,
+                      onTap: () => setState(() => _selected = e.key),
+                    ))
+                .toList(),
           ),
         ),
         Container(height: 2, color: AppColors.border),
@@ -563,43 +840,66 @@ class _ExpContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      RichText(
-        text: TextSpan(children: [
-          TextSpan(text: exp.role, style: AppTheme.display(size: 18, color: AppColors.textLight, weight: FontWeight.w600)),
-          TextSpan(text: ' @ ', style: AppTheme.sans(size: 18, color: AppColors.textMuted)),
-          TextSpan(text: exp.company, style: AppTheme.display(size: 18, color: AppColors.accent, weight: FontWeight.w600)),
-        ]),
-      ),
-      const SizedBox(height: 6),
-      Text(exp.period, style: AppTheme.mono(color: AppColors.textMuted, size: 12)),
-      const SizedBox(height: 20),
-      ...exp.description.split('. ').where((s) => s.trim().isNotEmpty).map((sentence) =>
-        Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 5, right: 12),
-                child: Text('▹', style: AppTheme.mono(color: AppColors.accent, size: 13)),
-              ),
-              Expanded(
-                child: Text(
-                  sentence.trim().endsWith('.') ? sentence.trim() : '${sentence.trim()}.',
-                  style: AppTheme.sans(size: 14, color: AppColors.textMuted, height: 1.7),
-                ),
-              ),
-            ],
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(children: [
+              TextSpan(
+                  text: exp.role,
+                  style: AppTheme.display(
+                      size: 18,
+                      color: AppColors.textLight,
+                      weight: FontWeight.w600)),
+              TextSpan(
+                  text: ' @ ',
+                  style: AppTheme.sans(size: 18, color: AppColors.textMuted)),
+              TextSpan(
+                  text: exp.company,
+                  style: AppTheme.display(
+                      size: 18,
+                      color: AppColors.accent,
+                      weight: FontWeight.w600)),
+            ]),
           ),
-        ),
-      ),
-      const SizedBox(height: 16),
-      Wrap(spacing: 10, runSpacing: 8,
-          children: exp.stack.map((t) => TagChip(t)).toList()),
-    ],
-  );
+          const SizedBox(height: 6),
+          Text(exp.period,
+              style: AppTheme.mono(color: AppColors.textMuted, size: 12)),
+          const SizedBox(height: 20),
+          ...exp.description
+              .split('. ')
+              .where((s) => s.trim().isNotEmpty)
+              .map((sentence) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 5, right: 12),
+                          child: Text('▹',
+                              style: AppTheme.mono(
+                                  color: AppColors.accent, size: 13)),
+                        ),
+                        Expanded(
+                          child: Text(
+                            sentence.trim().endsWith('.')
+                                ? sentence.trim()
+                                : '${sentence.trim()}.',
+                            style: AppTheme.sans(
+                                size: 14,
+                                color: AppColors.textMuted,
+                                height: 1.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+          const SizedBox(height: 16),
+          Wrap(
+              spacing: 10,
+              runSpacing: 8,
+              children: exp.stack.map((t) => TagChip(t)).toList()),
+        ],
+      );
 }
 
 class _Tab extends StatefulWidget {
@@ -615,32 +915,37 @@ class _TabState extends State<_Tab> {
   bool _hover = false;
   @override
   Widget build(BuildContext context) => MouseRegion(
-    cursor: SystemMouseCursors.click,
-    onEnter: (_) => setState(() => _hover = true),
-    onExit: (_) => setState(() => _hover = false),
-    child: GestureDetector(
-      onTap: widget.onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        width: 160,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        decoration: BoxDecoration(
-          color: (widget.selected || _hover) ? AppColors.accentLight : Colors.transparent,
-          border: Border(left: BorderSide(
-            color: widget.selected ? AppColors.accent : Colors.transparent,
-            width: 2,
-          )),
-        ),
-        child: Text(
-          widget.label,
-          style: AppTheme.mono(
-            color: widget.selected ? AppColors.accent : (_hover ? AppColors.accent : AppColors.textMuted),
-            size: 12,
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            width: 160,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+            decoration: BoxDecoration(
+              color: (widget.selected || _hover)
+                  ? AppColors.accentLight
+                  : Colors.transparent,
+              border: Border(
+                  left: BorderSide(
+                color: widget.selected ? AppColors.accent : Colors.transparent,
+                width: 2,
+              )),
+            ),
+            child: Text(
+              widget.label,
+              style: AppTheme.mono(
+                color: widget.selected
+                    ? AppColors.accent
+                    : (_hover ? AppColors.accent : AppColors.textMuted),
+                size: 12,
+              ),
+            ),
           ),
         ),
-      ),
-    ),
-  );
+      );
 }
 
 class _TabH extends StatefulWidget {
@@ -656,30 +961,33 @@ class _TabHState extends State<_TabH> {
   bool _hover = false;
   @override
   Widget build(BuildContext context) => MouseRegion(
-    cursor: SystemMouseCursors.click,
-    onEnter: (_) => setState(() => _hover = true),
-    onExit: (_) => setState(() => _hover = false),
-    child: GestureDetector(
-      onTap: widget.onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(
-            color: widget.selected ? AppColors.accent : Colors.transparent,
-            width: 2,
-          )),
-        ),
-        child: Text(
-          widget.label,
-          style: AppTheme.mono(
-            color: widget.selected ? AppColors.accent : (_hover ? AppColors.accent : AppColors.textMuted),
-            size: 12,
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border(
+                  bottom: BorderSide(
+                color: widget.selected ? AppColors.accent : Colors.transparent,
+                width: 2,
+              )),
+            ),
+            child: Text(
+              widget.label,
+              style: AppTheme.mono(
+                color: widget.selected
+                    ? AppColors.accent
+                    : (_hover ? AppColors.accent : AppColors.textMuted),
+                size: 12,
+              ),
+            ),
           ),
         ),
-      ),
-    ),
-  );
+      );
 }
 
 // ── Contact ───────────────────────────────────────────────────────────────────
@@ -691,37 +999,37 @@ class ContactSection extends StatefulWidget {
 }
 
 class _ContactSectionState extends State<ContactSection> {
-  final _nameCtrl    = TextEditingController();
-  final _emailCtrl   = TextEditingController();
+  final _nameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
   final _messageCtrl = TextEditingController();
   String _status = 'idle';
 
   Future<void> _submit() async {
-    final name    = _nameCtrl.text.trim();
-    final email   = _emailCtrl.text.trim();
+    final name = _nameCtrl.text.trim();
+    final email = _emailCtrl.text.trim();
     final message = _messageCtrl.text.trim();
 
     if (name.isEmpty || email.isEmpty || message.isEmpty) return;
 
     setState(() => _status = 'sending');
 
-    const serviceId  = 'service_yrp7yq4';
+    const serviceId = 'service_yrp7yq4';
     const templateId = 'template_q25o8nr';
-    const publicKey  = 'H2oPZZbHym3Hf1OtZ';
+    const publicKey = 'H2oPZZbHym3Hf1OtZ';
 
     try {
       final res = await http.post(
         Uri.parse('https://api.emailjs.com/api/v1.0/email/send'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'service_id':  serviceId,
+          'service_id': serviceId,
           'template_id': templateId,
-          'user_id':     publicKey,
+          'user_id': publicKey,
           'template_params': {
-            'from_name':  name,
+            'from_name': name,
             'from_email': email,
-            'message':    message,
-            'to_email':   'nathanielvelasco0915@gmail.com',
+            'message': message,
+            'to_email': 'nathanielvelasco0915@gmail.com',
           },
         }),
       );
@@ -729,7 +1037,9 @@ class _ContactSectionState extends State<ContactSection> {
       if (res.statusCode == 200) {
         setState(() {
           _status = 'success';
-          _nameCtrl.clear(); _emailCtrl.clear(); _messageCtrl.clear();
+          _nameCtrl.clear();
+          _emailCtrl.clear();
+          _messageCtrl.clear();
         });
       } else {
         setState(() => _status = 'error');
@@ -741,7 +1051,9 @@ class _ContactSectionState extends State<ContactSection> {
 
   @override
   void dispose() {
-    _nameCtrl.dispose(); _emailCtrl.dispose(); _messageCtrl.dispose();
+    _nameCtrl.dispose();
+    _emailCtrl.dispose();
+    _messageCtrl.dispose();
     super.dispose();
   }
 
@@ -765,7 +1077,10 @@ class _ContactSectionState extends State<ContactSection> {
                 delay: const Duration(milliseconds: 80),
                 child: Text(
                   "Get In Touch",
-                  style: AppTheme.display(size: w < 600 ? 36 : 52, color: AppColors.textLight, weight: FontWeight.w700),
+                  style: AppTheme.display(
+                      size: w < 600 ? 36 : 52,
+                      color: AppColors.textLight,
+                      weight: FontWeight.w700),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -774,7 +1089,8 @@ class _ContactSectionState extends State<ContactSection> {
                 delay: const Duration(milliseconds: 140),
                 child: Text(
                   "I'm currently open to new opportunities. Whether you have a project in mind, a question, or just want to say hi — I'll try my best to get back to you!",
-                  style: AppTheme.sans(size: 15, color: AppColors.textMuted, height: 1.7),
+                  style: AppTheme.sans(
+                      size: 15, color: AppColors.textMuted, height: 1.7),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -798,13 +1114,19 @@ class _ContactSectionState extends State<ContactSection> {
                       ),
                       if (_status == 'success') ...[
                         const SizedBox(height: 16),
-                        Center(child: Text("Message sent — I'll be in touch soon!",
-                            style: AppTheme.mono(color: AppColors.accent, size: 12))),
+                        Center(
+                            child: Text(
+                                "Message sent — I'll be in touch soon!",
+                                style: AppTheme.mono(
+                                    color: AppColors.accent, size: 12))),
                       ],
                       if (_status == 'error') ...[
                         const SizedBox(height: 16),
-                        Center(child: Text("Something went wrong. Please try again.",
-                            style: AppTheme.mono(color: Colors.redAccent, size: 12))),
+                        Center(
+                            child: Text(
+                                "Something went wrong. Please try again.",
+                                style: AppTheme.mono(
+                                    color: Colors.redAccent, size: 12))),
                       ],
                     ],
                   ),
@@ -816,11 +1138,18 @@ class _ContactSectionState extends State<ContactSection> {
                 child: Column(children: [
                   Container(height: 1, color: AppColors.border),
                   const SizedBox(height: 28),
-                  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                    Text('<NV />', style: AppTheme.mono(color: AppColors.accent, size: 14, weight: FontWeight.w600)),
-                    Text('Designed & Built by Nathaniel Velasco',
-                        style: AppTheme.mono(color: AppColors.textMuted, size: 10)),
-                  ]),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('<NV />',
+                            style: AppTheme.mono(
+                                color: AppColors.accent,
+                                size: 14,
+                                weight: FontWeight.w600)),
+                        Text('Designed & Built by Nathaniel Velasco',
+                            style: AppTheme.mono(
+                                color: AppColors.textMuted, size: 10)),
+                      ]),
                   const SizedBox(height: 8),
                   Text('${DateTime.now().year}',
                       style: AppTheme.mono(color: AppColors.border, size: 10)),
@@ -833,36 +1162,39 @@ class _ContactSectionState extends State<ContactSection> {
     );
   }
 
-  Widget _field(String label, TextEditingController ctrl, {int maxLines = 1}) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(label, style: AppTheme.mono(color: AppColors.accent, size: 11)),
-      const SizedBox(height: 6),
-      TextField(
-        controller: ctrl,
-        maxLines: maxLines,
-        style: AppTheme.sans(size: 14, color: AppColors.text),
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: AppColors.bg,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(4),
-            borderSide: const BorderSide(color: AppColors.border),
+  Widget _field(String label, TextEditingController ctrl, {int maxLines = 1}) =>
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label,
+              style: AppTheme.mono(color: AppColors.accent, size: 11)),
+          const SizedBox(height: 6),
+          TextField(
+            controller: ctrl,
+            maxLines: maxLines,
+            style: AppTheme.sans(size: 14, color: AppColors.text),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: AppColors.bg,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: const BorderSide(color: AppColors.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: const BorderSide(color: AppColors.accent),
+              ),
+            ),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(4),
-            borderSide: const BorderSide(color: AppColors.border),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(4),
-            borderSide: const BorderSide(color: AppColors.accent),
-          ),
-        ),
-      ),
-      const SizedBox(height: 18),
-    ],
-  );
+          const SizedBox(height: 18),
+        ],
+      );
 }
 
 class _SendButton extends StatefulWidget {
@@ -876,25 +1208,30 @@ class _SendButtonState extends State<_SendButton> {
   bool _hover = false;
   @override
   Widget build(BuildContext context) => MouseRegion(
-    cursor: SystemMouseCursors.click,
-    onEnter: (_) => setState(() => _hover = true),
-    onExit: (_) => setState(() => _hover = false),
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 16),
-      decoration: BoxDecoration(
-        color: _hover ? AppColors.accentLight : Colors.transparent,
-        border: Border.all(color: widget.status == 'sending' ? AppColors.border : AppColors.accent),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        widget.status == 'sending' ? 'Sending…' : 'Get in Touch',
-        style: AppTheme.mono(
-          color: widget.status == 'sending' ? AppColors.textMuted : AppColors.accent,
-          size: 13,
-          weight: FontWeight.w500,
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 16),
+          decoration: BoxDecoration(
+            color: _hover ? AppColors.accentLight : Colors.transparent,
+            border: Border.all(
+                color: widget.status == 'sending'
+                    ? AppColors.border
+                    : AppColors.accent),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            widget.status == 'sending' ? 'Sending…' : 'Get in Touch',
+            style: AppTheme.mono(
+              color: widget.status == 'sending'
+                  ? AppColors.textMuted
+                  : AppColors.accent,
+              size: 13,
+              weight: FontWeight.w500,
+            ),
+          ),
         ),
-      ),
-    ),
-  );
+      );
 }
