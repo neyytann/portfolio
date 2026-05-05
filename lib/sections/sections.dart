@@ -306,48 +306,137 @@ class ProjectsSection extends StatelessWidget {
   }
 }
 
-class _ProjectCard extends StatelessWidget {
+class _ProjectCard extends StatefulWidget {
   final Project project;
   final int index;
   const _ProjectCard({required this.project, required this.index});
+  @override
+  State<_ProjectCard> createState() => _ProjectCardState();
+}
+
+class _ProjectCardState extends State<_ProjectCard> {
+  bool _showImage = false;
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 768;
+
     return CardBox(
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Icon(Icons.folder_outlined, color: AppColors.accent, size: 36),
-              Row(children: [
-                _IconLink(icon: Icons.code, url: project.github),
-                if (project.live.isNotEmpty) ...[
-                  const SizedBox(width: 12),
-                  _IconLink(icon: Icons.open_in_new, url: project.live),
-                ],
-              ]),
-            ],
+          // Image preview — show/hide toggle
+          if (widget.project.image.isNotEmpty)
+            GestureDetector(
+              onTap: () => setState(() => _showImage = !_showImage),
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  height: _showImage ? (isMobile ? 180.0 : 240.0) : 0,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                    child: _showImage
+                        ? Image.asset(
+                            widget.project.image,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: AppColors.bgCard,
+                              child: Center(
+                                child: Text('No preview available',
+                                    style: AppTheme.mono(
+                                        color: AppColors.textMuted, size: 12)),
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ),
+              ),
+            ),
+
+          // Card content
+          Padding(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Icon(Icons.folder_outlined, color: AppColors.accent, size: 36),
+                    Row(children: [
+                      // Preview toggle button
+                      if (widget.project.image.isNotEmpty)
+                        _ActionButton(
+                          icon: _showImage ? Icons.visibility_off : Icons.visibility,
+                          tooltip: _showImage ? 'Hide preview' : 'Show preview',
+                          onTap: () => setState(() => _showImage = !_showImage),
+                        ),
+                    ]),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  widget.project.name,
+                  style: AppTheme.display(
+                      size: 18, color: AppColors.textLight, weight: FontWeight.w600),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  widget.project.description,
+                  style: AppTheme.sans(size: 14, color: AppColors.textMuted, height: 1.7),
+                ),
+                const SizedBox(height: 20),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 8,
+                  children: widget.project.stack.map((t) => TagChip(t)).toList(),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 20),
-          Text(
-            project.name,
-            style: AppTheme.display(size: 18, color: AppColors.textLight, weight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            project.description,
-            style: AppTheme.sans(size: 14, color: AppColors.textMuted, height: 1.7),
-          ),
-          const SizedBox(height: 20),
-          Wrap(spacing: 12, runSpacing: 8,
-              children: project.stack.map((t) => TagChip(t)).toList()),
         ],
       ),
     );
   }
+}
+
+class _ActionButton extends StatefulWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+  const _ActionButton({required this.icon, required this.tooltip, required this.onTap});
+  @override
+  State<_ActionButton> createState() => _ActionButtonState();
+}
+
+class _ActionButtonState extends State<_ActionButton> {
+  bool _hover = false;
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+    cursor: SystemMouseCursors.click,
+    onEnter: (_) => setState(() => _hover = true),
+    onExit: (_) => setState(() => _hover = false),
+    child: Tooltip(
+      message: widget.tooltip,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          transform: Matrix4.translationValues(0, _hover ? -3 : 0, 0),
+          child: Icon(
+            widget.icon,
+            color: _hover ? AppColors.accent : AppColors.textMuted,
+            size: 20,
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class _IconLink extends StatefulWidget {

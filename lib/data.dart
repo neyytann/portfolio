@@ -11,6 +11,7 @@ class Project {
   final List<String> stack;
   final String github;
   final String live;
+  final String image;
   const Project({
     required this.number,
     required this.name,
@@ -18,6 +19,7 @@ class Project {
     required this.stack,
     required this.github,
     this.live = '',
+    this.image = '',
   });
 }
 
@@ -52,14 +54,16 @@ const projects = [
     description: 'A centralized platform designed to streamline and automate the administration of internship programs. It enables organizations to efficiently manage intern records, monitor attendance, and track overall performance within a single system. By digitizing routine processes, it reduces manual workload and improves accuracy in handling intern-related data.',
     stack: ['Flutter', 'Go', 'REST API', 'PostgreSQL'],
     github: 'https://github.com/yourusername/project-one',
-    live: 'https://yourproject.com',
+    live: '',
+    image: 'lib/assets/images/project1.png',
   ),
   Project(
     number: '02',
     name: 'Project Name',
     description: 'A short description of what this project does and the problem it solves. Replace this with your own project details.',
     stack: ['Flutter', 'Go', 'REST API'],
-    github: 'https://github.com/yourusername/project-two',
+    github: '',
+    image: 'lib/assets/images/project2.png',
   ),
 ];
 
