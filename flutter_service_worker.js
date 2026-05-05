@@ -36,7 +36,7 @@ const RESOURCES = {"assets/assets/images/intern5.png": "25f344272e980cb560e8b549
 "canvaskit/canvaskit.js": "26eef3024dbc64886b7f48e1b6fb05cf",
 "canvaskit/skwasm.js": "ac0f73826b925320a1e9b0d3fd7da61c",
 "flutter.js": "4b2350e14c6650ba82871f60906437ea",
-"flutter_bootstrap.js": "b32060068450c3e07ecd5363928865ad",
+"flutter_bootstrap.js": "bd47494c2fc81b9ff733acf32e5346eb",
 "NV.png": "c5f460cffd8844886af18cff4c219780",
 "main.dart.js": "89a9a189ceba696a7f84d762403fa319",
 "version.json": "f8f07d5768b7e192ebc9761932a6d5bc",
