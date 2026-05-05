@@ -75965,7 +75965,7 @@ $0(){return this.a.f=!0},
 $S:0}
 A.Bj.prototype={
 H(a){var s=null,r=A.bl(B.n,14,B.k),q=this.f,p=A.mW(B.bp,1.05,q?42:68,B.br),o=A.mW(B.v,1.1,q?28:50,B.br),n=t.p
-return A.cj(A.b([new A.Do("Hi, my name is",r,B.u,s),B.c6,new A.u6("Nathaniel Velasco.",p,B.d5,s),B.xB,new A.u6("Building robust backend systems.",o,B.BT,s),B.xC,new A.pf(A.aO("I'm a backend developer specializing in building reliable, scalable, and efficient server-side systems. I focus on designing APIs, managing databases, and implementing the core logic that powers seamless digital experiences.",s,s,s,A.hs(B.v,1.7,q?15:16,B.b_),s,s),B.BY,s),B.eC,new A.pf(A.t3(A.b([new A.ta("Check out my work!",this.d,!0,s),new A.ta("Get In Touch",this.e,!1,s)],n),12,16),B.C_,s),B.eC,new A.pf(new A.Ro(s),B.C0,s)],n),B.Z,B.ja,B.y)}}
+return A.cj(A.b([new A.Do("Hi, my name is",r,B.u,s),B.c6,new A.u6("Nathaniel Velasco",p,B.d5,s),B.xB,new A.u6("Building robust backend systems.",o,B.BT,s),B.xC,new A.pf(A.aO("I'm a backend developer specializing in building reliable, scalable, and efficient server-side systems. I focus on designing APIs, managing databases, and implementing the core logic that powers seamless digital experiences.",s,s,s,A.hs(B.v,1.7,q?15:16,B.b_),s,s),B.BY,s),B.eC,new A.pf(A.t3(A.b([new A.ta("Check out my work!",this.d,!0,s),new A.ta("Get In Touch",this.e,!1,s)],n),12,16),B.C_,s),B.eC,new A.pf(new A.Ro(s),B.C0,s)],n),B.Z,B.ja,B.y)}}
 A.Do.prototype={
 a5(){return new A.Dp()}}
 A.Dp.prototype={
