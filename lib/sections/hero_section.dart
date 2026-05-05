@@ -103,7 +103,7 @@ class _HeroText extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         _WordReveal(
-          text: 'Nathaniel Velasco.',
+          text: 'Nathaniel Velasco',
           style: AppTheme.display(
             size: isMobile ? 42 : 68,
             color: AppColors.textLight,
