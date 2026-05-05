@@ -104,7 +104,7 @@ class _ResumeButtonState extends State<_ResumeButton> {
     onExit: (_) => setState(() => _hover = false),
     child: GestureDetector(
       onTap: () async {
-        final uri = Uri.parse('https://your-resume-url.com/resume.pdf'); // ← replace this
+        final uri = Uri.parse('https://drive.google.com/uc?export=download&id=1KjTtpp_qJVDM3pgZUqczpAw52vIYPPw1');
         if (await canLaunchUrl(uri)) {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
         }
