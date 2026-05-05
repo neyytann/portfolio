@@ -799,7 +799,7 @@ class _SendButtonState extends State<_SendButton> {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        widget.status == 'sending' ? 'Sending…' : 'Say Hello',
+        widget.status == 'sending' ? 'Sending…' : 'Get in Touch',
         style: AppTheme.mono(
           color: widget.status == 'sending' ? AppColors.textMuted : AppColors.accent,
           size: 13,

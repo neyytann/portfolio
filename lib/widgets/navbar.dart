@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PortfolioNavbar extends StatefulWidget implements PreferredSizeWidget {
   final List<String> sections;
@@ -42,11 +43,10 @@ class _PortfolioNavbarState extends State<PortfolioNavbar> {
               if (!isMobile)
                 Row(
                   children: [
-                    ...widget.sections.asMap().entries.map((e) =>
+                    ...widget.sections.map((label) =>
                       _NavLink(
-                        index: e.key + 1,
-                        label: e.value,
-                        onTap: () => widget.onTap(e.value),
+                        label: label,
+                        onTap: () => widget.onTap(label),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -99,26 +99,34 @@ class _ResumeButtonState extends State<_ResumeButton> {
 
   @override
   Widget build(BuildContext context) => MouseRegion(
+    cursor: SystemMouseCursors.click,
     onEnter: (_) => setState(() => _hover = true),
     onExit: (_) => setState(() => _hover = false),
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: _hover ? AppColors.accentLight : Colors.transparent,
-        border: Border.all(color: AppColors.accent),
-        borderRadius: BorderRadius.circular(4),
+    child: GestureDetector(
+      onTap: () async {
+        final uri = Uri.parse('https://your-resume-url.com/resume.pdf'); // ← replace this
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: _hover ? AppColors.accentLight : Colors.transparent,
+          border: Border.all(color: AppColors.accent),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text('Resume', style: AppTheme.mono(color: AppColors.accent, size: 12)),
       ),
-      child: Text('Resume', style: AppTheme.mono(color: AppColors.accent, size: 12)),
     ),
   );
 }
 
 class _NavLink extends StatefulWidget {
-  final int index;
   final String label;
   final VoidCallback onTap;
-  const _NavLink({required this.index, required this.label, required this.onTap});
+  const _NavLink({required this.label, required this.onTap});
 
   @override
   State<_NavLink> createState() => _NavLinkState();
@@ -128,29 +136,21 @@ class _NavLinkState extends State<_NavLink> {
   bool _hover = false;
 
   @override
-  Widget build(BuildContext context) => MouseRegion(
-    cursor: SystemMouseCursors.click,
-    onEnter: (_) => setState(() => _hover = true),
-    onExit: (_) => setState(() => _hover = false),
-    child: GestureDetector(
-      onTap: widget.onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-        child: RichText(
-          text: TextSpan(children: [
-            TextSpan(
-              text: '0${widget.index}. ',
-              style: AppTheme.mono(color: AppColors.accent, size: 11),
-            ),
-            TextSpan(
-              text: widget.label,
-              style: AppTheme.sans(
-                color: _hover ? AppColors.accent : AppColors.textLight,
-                size: 13,
-                weight: FontWeight.w400,
-              ),
-            ),
-          ]),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 14),
+    child: MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Text(
+          widget.label,
+          style: AppTheme.sans(
+            color: _hover ? AppColors.accent : AppColors.textLight,
+            size: 13,
+            weight: FontWeight.w400,
+          ),
         ),
       ),
     ),
