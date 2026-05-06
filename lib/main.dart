@@ -59,7 +59,6 @@ class _PortfolioHomeState extends State<PortfolioHome> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = MediaQuery.of(context).size.width >= 1100;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: PreferredSize(
