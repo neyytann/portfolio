@@ -1064,7 +1064,7 @@ class _ContactSectionState extends State<ContactSection> {
       padding: _pad(context),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
+          constraints: const BoxConstraints(maxWidth: 500),  // width of contact form
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -1098,7 +1098,7 @@ class _ContactSectionState extends State<ContactSection> {
               _ScrollReveal(
                 delay: const Duration(milliseconds: 180),
                 child: CardBox(
-                  padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.all(32),   // padding inside textfield and outer box
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1177,7 +1177,7 @@ class _ContactSectionState extends State<ContactSection> {
               filled: true,
               fillColor: AppColors.bg,
               contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10), // size of input field
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(4),
                 borderSide: const BorderSide(color: AppColors.border),
@@ -1192,7 +1192,7 @@ class _ContactSectionState extends State<ContactSection> {
               ),
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 8), // height of contact form
         ],
       );
 }
