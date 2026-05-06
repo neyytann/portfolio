@@ -769,8 +769,6 @@ class _SocialRow extends StatelessWidget {
       const SizedBox(width: 20),
       _SocialLink(label: 'LinkedIn', url: 'https://linkedin.com/in/nathanielvelasco'),
       const SizedBox(width: 20),
-      _SocialLink(label: 'Twitter', url: 'https://twitter.com/yourhandle'),
-      const SizedBox(width: 20),
       Container(width: 80, height: 1, color: AppColors.border),
     ]);
   }

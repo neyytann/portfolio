@@ -89,30 +89,8 @@ class _PortfolioHomeState extends State<PortfolioHome> {
               ],
             ),
           ),
-          if (isDesktop) Positioned(bottom: 0, left: 32, child: _LeftRail()),
-          if (isDesktop) Positioned(bottom: 0, right: 32, child: _RightRail()),
         ],
       ),
-    );
-  }
-}
-
-// ── Left rail ─────────────────────────────────────────────────────────────────
-
-class _LeftRail extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _SideIcon(label: 'GH', url: 'https://github.com/neyytann'),
-        const SizedBox(height: 16),
-        _SideIcon(label: 'LI', url: 'https://linkedin.com/in/nathanielvelasco'),
-        const SizedBox(height: 16),
-        _SideIcon(label: 'TW', url: 'https://twitter.com/yourhandle'),
-        const SizedBox(height: 16),
-        Container(width: 1, height: 80, color: AppColors.textMuted.withOpacity(0.4)),
-      ],
     );
   }
 }
@@ -149,55 +127,4 @@ class _SideIconState extends State<_SideIcon> {
       ),
     ),
   );
-}
-
-// ── Right rail ────────────────────────────────────────────────────────────────
-
-class _RightRail extends StatefulWidget {
-  @override
-  State<_RightRail> createState() => _RightRailState();
-}
-
-class _RightRailState extends State<_RightRail> {
-  bool _hover = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        MouseRegion(
-          cursor: SystemMouseCursors.click,
-          onEnter: (_) => setState(() => _hover = true),
-          onExit: (_) => setState(() => _hover = false),
-          child: GestureDetector(
-            onTap: () async {
-              final uri = Uri.parse(
-                'https://mail.google.com/mail/?view=cm&to=nathanielvelasco0915@gmail.com',
-              );
-              if (await canLaunchUrl(uri)) {
-                await launchUrl(uri, mode: LaunchMode.externalApplication);
-              }
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              transform: Matrix4.translationValues(0, _hover ? -4 : 0, 0),
-              child: RotatedBox(
-                quarterTurns: 1,
-                child: Text(
-                  'nathanielvelasco0915@gmail.com',
-                  style: AppTheme.mono(
-                    color: _hover ? AppColors.textLight : AppColors.textMuted,
-                    size: 11,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        Container(width: 1, height: 80, color: AppColors.textMuted.withOpacity(0.4)),
-      ],
-    );
-  }
 }
