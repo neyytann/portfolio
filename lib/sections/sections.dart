@@ -1146,7 +1146,7 @@ class _ContactSectionState extends State<ContactSection> {
                                 color: AppColors.accent,
                                 size: 14,
                                 weight: FontWeight.w600)),
-                        Text('Designed & Built by Nathaniel Velasco',
+                        Text('All Rights Reserved.',
                             style: AppTheme.mono(
                                 color: AppColors.textMuted, size: 10)),
                       ]),

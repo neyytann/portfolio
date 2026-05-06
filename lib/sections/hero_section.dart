@@ -767,7 +767,7 @@ class _SocialRow extends StatelessWidget {
     return Row(children: [
       _SocialLink(label: 'GitHub', url: 'https://github.com/neyytann'),
       const SizedBox(width: 20),
-      _SocialLink(label: 'LinkedIn', url: 'https://linkedin.com/in/yourname'),
+      _SocialLink(label: 'LinkedIn', url: 'https://linkedin.com/in/nathanielvelasco'),
       const SizedBox(width: 20),
       _SocialLink(label: 'Twitter', url: 'https://twitter.com/yourhandle'),
       const SizedBox(width: 20),

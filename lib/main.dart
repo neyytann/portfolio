@@ -107,7 +107,7 @@ class _LeftRail extends StatelessWidget {
       children: [
         _SideIcon(label: 'GH', url: 'https://github.com/neyytann'),
         const SizedBox(height: 16),
-        _SideIcon(label: 'LI', url: 'https://linkedin.com/in/yourname'),
+        _SideIcon(label: 'LI', url: 'https://linkedin.com/in/nathanielvelasco'),
         const SizedBox(height: 16),
         _SideIcon(label: 'TW', url: 'https://twitter.com/yourhandle'),
         const SizedBox(height: 16),
@@ -160,24 +160,36 @@ class _RightRail extends StatefulWidget {
 
 class _RightRailState extends State<_RightRail> {
   bool _hover = false;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         MouseRegion(
+          cursor: SystemMouseCursors.click,
           onEnter: (_) => setState(() => _hover = true),
           onExit: (_) => setState(() => _hover = false),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            transform: Matrix4.translationValues(0, _hover ? -4 : 0, 0),
-            child: RotatedBox(
-              quarterTurns: 1,
-              child: Text(
-                'nathanielvelasco0915@gmail.com',
-                style: AppTheme.mono(
-                  color: _hover ? AppColors.accent : AppColors.textMuted,
-                  size: 11,
+          child: GestureDetector(
+            onTap: () async {
+              final uri = Uri.parse(
+                'https://mail.google.com/mail/?view=cm&to=nathanielvelasco0915@gmail.com',
+              );
+              if (await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              }
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              transform: Matrix4.translationValues(0, _hover ? -4 : 0, 0),
+              child: RotatedBox(
+                quarterTurns: 1,
+                child: Text(
+                  'nathanielvelasco0915@gmail.com',
+                  style: AppTheme.mono(
+                    color: _hover ? AppColors.textLight : AppColors.textMuted,
+                    size: 11,
+                  ),
                 ),
               ),
             ),
