@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import '../theme.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:html' as html;
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class PortfolioNavbar extends StatefulWidget implements PreferredSizeWidget {
   final List<String> sections;
@@ -104,9 +109,21 @@ class _ResumeButtonState extends State<_ResumeButton> {
     onExit: (_) => setState(() => _hover = false),
     child: GestureDetector(
       onTap: () async {
-        final uri = Uri.parse('https://drive.google.com/uc?export=download&id=1KjTtpp_qJVDM3pgZUqczpAw52vIYPPw1');
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        final byteData = await rootBundle.load('assets/N.Velasco.pdf');
+        final bytes = byteData.buffer.asUint8List();
+
+        if (kIsWeb) {
+          final blob = html.Blob([bytes], 'application/pdf');
+          final url = html.Url.createObjectUrlFromBlob(blob);
+            html.AnchorElement(href: url)
+            ..setAttribute('download', 'N.Velasco.pdf')
+            ..click();
+          html.Url.revokeObjectUrl(url);
+        } else {
+          final tempDir = await getTemporaryDirectory();
+          final file = File('${tempDir.path}/N.Velasco.pdf');
+          await file.writeAsBytes(bytes);
+          await launchUrl(Uri.file(file.path));
         }
       },
       child: AnimatedContainer(
