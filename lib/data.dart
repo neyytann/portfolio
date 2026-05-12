@@ -62,10 +62,10 @@ const projects = [
   ),
   Project(
     number: '02',
-    name: 'Portfolio Website',
+    name: 'Portfolio - Website',
     description: 'A portfolio website presenting my work as a software developer, highlighting projects, technical skills, and experience in building functional and efficient applications.',
     stack: ['Flutter'],
-    github: 'https://github.com/neyytann/portfolio',
+    github: 'https://neyytann.github.io/portfolio/',
     images: [
       'assets/images/portfolio.png',
       'assets/images/portfolio2.png',
@@ -73,6 +73,20 @@ const projects = [
       'assets/images/portfolio4.png',
       'assets/images/portfolio5.png',
       'assets/images/portfolio6.png',
+    ],
+  ),
+  Project(
+    number: '03',
+    name: 'Couple Anniversary - Website',
+    description: 'Welcome to the story of our first year together — a collection of memories, moments, and milestones that shaped our journey.',
+    stack: ['Flutter'],
+    github: 'https://neyytann.github.io/anniversary/',
+    images: [
+      'assets/images/anniversary.png',
+      'assets/images/anniversary2.png',
+      'assets/images/anniversary3.png',
+      'assets/images/anniversary4.png',
+      'assets/images/anniversary5.png',
     ],
   ),
 ];

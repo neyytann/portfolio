@@ -498,7 +498,7 @@ class _GitHubButtonState extends State<_GitHubButton> {
                 Icon(Icons.code, color: AppColors.accent, size: 14),
                 const SizedBox(width: 8),
                 Text(
-                  'View on GitHub',
+                  'View',
                   style: AppTheme.mono(
                       color: AppColors.accent,
                       size: 12,
